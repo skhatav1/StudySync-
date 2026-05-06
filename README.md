@@ -39,10 +39,10 @@ StudySync turns scattered deadlines, notes, and group chats into one adaptive st
 - Firebase Storage support is scaffolded for uploaded study resources; the current Spark-plan demo uses link/reference resources because Storage requires billing in this Firebase project
 
 More detail:
-- [architecture.md](docs/architecture.md)
-- [api-design.md](docs/api-design.md)
-- [database-schema.md](docs/database-schema.md)
-- [pitch.md](docs/pitch.md)
+- [architecture.md](/Users/suar/Desktop/StudySync-/docs/architecture.md)
+- [api-design.md](/Users/suar/Desktop/StudySync-/docs/api-design.md)
+- [database-schema.md](/Users/suar/Desktop/StudySync-/docs/database-schema.md)
+- [pitch.md](/Users/suar/Desktop/StudySync-/docs/pitch.md)
 
 ## Firestore collections
 
@@ -105,10 +105,10 @@ Create a Firebase project and enable:
 Then:
 1. Create a Firebase service account and download the JSON key.
 2. Point `FIREBASE_CREDENTIALS_PATH` in `backend/.env` to that JSON file.
-3. Replace placeholder values in [firebase_options.dart](frontend/lib/firebase_options.dart) with your real Firebase config.
+3. Replace placeholder values in [firebase_options.dart](/Users/suar/Desktop/StudySync-/frontend/lib/firebase_options.dart) with your real Firebase config.
 4. Deploy the rules from:
-   - [firestore.rules](firebase/firestore.rules)
-   - [storage.rules](firebase/storage.rules)
+   - [firestore.rules](/Users/suar/Desktop/StudySync-/firebase/firestore.rules)
+   - [storage.rules](/Users/suar/Desktop/StudySync-/firebase/storage.rules)
 
 Note: If Firebase Storage shows an upgrade prompt, skip Storage for now. StudySync still works locally with resource links/references through Firestore and FastAPI.
 
@@ -121,46 +121,6 @@ flutter run -d chrome
 ```
 
 For local backend calls from Flutter web, use:
-
-```bash
-flutter run -d chrome --dart-define=API_BASE_URL=http://127.0.0.1:8000
-```
-
-## Screenshots
-
-Add screenshots to [docs/screenshots](docs/screenshots) using these filenames, then uncomment or add the image table below:
-
-```md
-| Dashboard | AI Study Plan |
-|---|---|
-| ![Dashboard](docs/screenshots/dashboard.png) | ![AI Study Plan](docs/screenshots/study-plan.png) |
-
-| Resource AI | Study Groups |
-|---|---|
-| ![Resource AI](docs/screenshots/resource-ai.png) | ![Study Groups](docs/screenshots/groups.png) |
-
-| Analytics |
-|---|
-| ![Analytics](docs/screenshots/analytics.png) |
-```
-
-## Firebase Hosting
-
-This repo includes Firebase Hosting config:
-
-- [firebase.json](firebase.json)
-- [.firebaserc](.firebaserc)
-
-Build and deploy the Flutter web app:
-
-```bash
-cd /Users/suar/Desktop/StudySync-/frontend
-flutter build web --dart-define=API_BASE_URL=https://YOUR_BACKEND_URL
-cd /Users/suar/Desktop/StudySync-
-firebase deploy --only hosting
-```
-
-For local-only demos, keep using:
 
 ```bash
 flutter run -d chrome --dart-define=API_BASE_URL=http://127.0.0.1:8000
