@@ -1,0 +1,74 @@
+{
+  "users": [
+    {
+      "id": "u_003",
+      "name": "Alex Johnson",
+      "email": "alex@studysync.app",
+      "learningStyle": "mixed",
+      "dailyHours": 3.5,
+      "weakSubjects": ["Calculus", "Biology"],
+      "studyStreak": 12
+    },
+    {
+      "id": "u_001",
+      "name": "Maya Chen",
+      "email": "maya@studysync.app",
+      "learningStyle": "visual",
+      "dailyHours": 2.5,
+      "weakSubjects": ["Algorithms"]
+    }
+  ],
+  "courses": [
+    {
+      "id": "course_calc",
+      "name": "Calculus II",
+      "examDate": "2026-04-12",
+      "priority": "high",
+      "confidence": 4
+    },
+    {
+      "id": "course_dsa",
+      "name": "Data Structures",
+      "examDate": "2026-04-15",
+      "priority": "high",
+      "confidence": 6
+    },
+    {
+      "id": "course_bio",
+      "name": "Biology",
+      "examDate": "2026-04-18",
+      "priority": "medium",
+      "confidence": 5
+    }
+  ],
+  "deadlines": [
+    {
+      "id": "deadline_lab",
+      "title": "Biology lab report",
+      "course": "Biology",
+      "dueDate": "2026-04-10",
+      "estimatedHours": 4
+    },
+    {
+      "id": "deadline_hw",
+      "title": "Calculus problem set 7",
+      "course": "Calculus II",
+      "dueDate": "2026-04-11",
+      "estimatedHours": 3
+    }
+  ],
+  "study_groups": [
+    {
+      "id": "group-dsa",
+      "name": "Algorithm Sprint Crew",
+      "subject": "Data Structures"
+    }
+  ],
+  "resources": [
+    {
+      "id": "res_calc_notes",
+      "title": "Integration Techniques Summary",
+      "subject": "Calculus"
+    }
+  ]
+}
