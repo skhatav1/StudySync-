@@ -1,4 +1,5 @@
 from functools import lru_cache
+import json
 from pathlib import Path
 
 import firebase_admin
@@ -12,6 +13,16 @@ def get_firebase_app():
     settings = get_settings()
     if firebase_admin._apps:
       return firebase_admin.get_app()
+
+    if settings.firebase_credentials_json:
+        cred = credentials.Certificate(json.loads(settings.firebase_credentials_json))
+        return firebase_admin.initialize_app(
+            cred,
+            {
+                "projectId": settings.firebase_project_id,
+                "storageBucket": settings.firebase_storage_bucket,
+            },
+        )
 
     if settings.firebase_credentials_path:
         cred = credentials.Certificate(Path(settings.firebase_credentials_path).expanduser())

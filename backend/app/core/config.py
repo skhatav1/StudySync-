@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     firebase_project_id: str = "studysync-demo"
     firebase_storage_bucket: str = "studysync-demo.appspot.com"
     firebase_credentials_path: str = ""
+    firebase_credentials_json: str = ""
     enable_demo_mode: bool = False
     api_cors_origins: str = "http://localhost:3000,http://localhost:5000,http://localhost:8000,http://localhost:8080"
     api_cors_origin_regex: str = r"https?://(localhost|127\.0\.0\.1):\d+"

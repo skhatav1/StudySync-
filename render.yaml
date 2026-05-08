@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: studysync-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: OPENAI_MODEL
+        value: gpt-5-mini
+      - key: FIREBASE_PROJECT_ID
+        value: studysync-cabc3
+      - key: FIREBASE_STORAGE_BUCKET
+        value: studysync-cabc3.firebasestorage.app
+      - key: ENABLE_DEMO_MODE
+        value: false
+      - key: API_CORS_ORIGINS
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: FIREBASE_CREDENTIALS_JSON
+        sync: false

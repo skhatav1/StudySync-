@@ -39,10 +39,11 @@ StudySync turns scattered deadlines, notes, and group chats into one adaptive st
 - Firebase Storage support is scaffolded for uploaded study resources; the current Spark-plan demo uses link/reference resources because Storage requires billing in this Firebase project
 
 More detail:
-- [architecture.md](/Users/suar/Desktop/StudySync-/docs/architecture.md)
-- [api-design.md](/Users/suar/Desktop/StudySync-/docs/api-design.md)
-- [database-schema.md](/Users/suar/Desktop/StudySync-/docs/database-schema.md)
-- [pitch.md](/Users/suar/Desktop/StudySync-/docs/pitch.md)
+- [architecture.md](docs/architecture.md)
+- [api-design.md](docs/api-design.md)
+- [database-schema.md](docs/database-schema.md)
+- [pitch.md](docs/pitch.md)
+- [deployment.md](docs/deployment.md)
 
 ## Firestore collections
 
@@ -105,10 +106,10 @@ Create a Firebase project and enable:
 Then:
 1. Create a Firebase service account and download the JSON key.
 2. Point `FIREBASE_CREDENTIALS_PATH` in `backend/.env` to that JSON file.
-3. Replace placeholder values in [firebase_options.dart](/Users/suar/Desktop/StudySync-/frontend/lib/firebase_options.dart) with your real Firebase config.
+3. Replace placeholder values in [firebase_options.dart](frontend/lib/firebase_options.dart) with your real Firebase config.
 4. Deploy the rules from:
-   - [firestore.rules](/Users/suar/Desktop/StudySync-/firebase/firestore.rules)
-   - [storage.rules](/Users/suar/Desktop/StudySync-/firebase/storage.rules)
+   - [firestore.rules](firebase/firestore.rules)
+   - [storage.rules](firebase/storage.rules)
 
 Note: If Firebase Storage shows an upgrade prompt, skip Storage for now. StudySync still works locally with resource links/references through Firestore and FastAPI.
 
@@ -173,6 +174,14 @@ Use this exact flow for a reliable 3-minute demo:
 - If `OPENAI_API_KEY` is missing, the backend returns deterministic development fallbacks for AI responses so the app can still be exercised locally.
 - Firebase project values in `firebase_options.dart` must match your Firebase web app before real app runtime.
 - Resource links work on the free Firebase Spark plan. Direct file uploads require enabling Firebase Storage, which currently requires upgrading the Firebase project billing plan.
+
+## Deployment
+
+Deployment instructions are in [deployment.md](docs/deployment.md). The recommended setup is:
+
+- Render for the FastAPI backend
+- Vercel for the Flutter web frontend
+- Firebase Auth/Firestore for app data
 
 ## Future improvements
 
