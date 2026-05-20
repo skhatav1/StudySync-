@@ -22,6 +22,9 @@ venv/
 # Backend artifacts
 backend/.env
 backend/firebase-service-account.json
+backend/*firebase*.json
+backend/studysync-*.json
+backend/*service*account*.json
 
 # Flutter / Dart generated output
 frontend/.dart_tool/
