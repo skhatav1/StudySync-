@@ -64,12 +64,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Demo-ready defaults',
-                      style: theme.textTheme.titleLarge),
+                  Text(
+                    'Demo-ready defaults',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: const Color(0xFF172033),
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
                   const SizedBox(height: 6),
                   Text(
                     'You can keep these values for a fast demo or edit them to match your own courses.',
-                    style: theme.textTheme.bodyMedium,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: const Color(0xFF5F6B7A),
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),
