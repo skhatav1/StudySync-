@@ -16,6 +16,7 @@ class ProfileProvider extends ChangeNotifier {
   bool loading = false;
   bool hasLoaded = false;
   String? error;
+  String? loadedUid;
 
   bool get needsOnboarding {
     if (profile == null) return true;
@@ -24,6 +25,13 @@ class ProfileProvider extends ChangeNotifier {
 
   Future<void> load(User user) async {
     loading = true;
+    hasLoaded = false;
+    loadedUid = user.uid;
+    profile = null;
+    courses = const [];
+    exams = const [];
+    assignments = const [];
+    error = null;
     notifyListeners();
     try {
       await _repository.ensureProfile(user);
@@ -70,6 +78,9 @@ class ProfileProvider extends ChangeNotifier {
   }
 
   void seedDemoFields(User user) {
+    if (profile != null && profile!.uid != user.uid) {
+      clear();
+    }
     profile ??= UserProfile(
       uid: user.uid,
       name: user.displayName ?? 'Student',
@@ -83,5 +94,16 @@ class ProfileProvider extends ChangeNotifier {
       targetGrades: const {},
       collaborationPreferences: const [],
     );
+  }
+
+  void clear() {
+    profile = null;
+    courses = const [];
+    exams = const [];
+    assignments = const [];
+    loading = false;
+    hasLoaded = false;
+    error = null;
+    loadedUid = null;
   }
 }

@@ -16,9 +16,15 @@ class StudySyncApp extends StatelessWidget {
     final auth = context.watch<AuthProvider>();
     final profile = context.watch<ProfileProvider>();
 
-    if (auth.currentUser != null && !profile.hasLoaded && !profile.loading) {
-      profile.seedDemoFields(auth.currentUser!);
-      profile.load(auth.currentUser!);
+    final currentUser = auth.currentUser;
+    if (currentUser == null && profile.hasLoaded) {
+      profile.clear();
+    }
+    if (currentUser != null &&
+        profile.loadedUid != currentUser.uid &&
+        !profile.loading) {
+      profile.seedDemoFields(currentUser);
+      profile.load(currentUser);
     }
 
     return MaterialApp(
