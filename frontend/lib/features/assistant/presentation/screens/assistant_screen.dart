@@ -34,6 +34,17 @@ class _AssistantScreenState extends State<AssistantScreen> {
   Widget build(BuildContext context) {
     final assistant = context.watch<AssistantProvider>();
     final theme = Theme.of(context);
+    const outputInk = Color(0xFF172033);
+    const outputMuted = Color(0xFF5F6B7A);
+    final outputButtonStyle = FilledButton.styleFrom(
+      backgroundColor: outputInk,
+      foregroundColor: const Color(0xFFFFF5D8),
+      disabledBackgroundColor: outputInk.withValues(alpha: 0.38),
+      disabledForegroundColor: const Color(0xFFFFF5D8).withValues(alpha: 0.7),
+      textStyle: theme.textTheme.labelLarge?.copyWith(
+        fontWeight: FontWeight.w800,
+      ),
+    );
     final output = assistant.summary != null
         ? assistant.summary!.bullets.join('\n')
         : assistant.chatResponse?.reply ??
@@ -135,17 +146,39 @@ class _AssistantScreenState extends State<AssistantScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SectionHeader(title: 'Assistant output'),
+                  Text(
+                    'Assistant output',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: outputInk,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Review generated guidance or open the full study asset.',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: outputMuted,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
                   if (assistant.loading) const LinearProgressIndicator(),
                   if (assistant.error != null) ...[
                     ErrorText(assistant.error!),
                     const SizedBox(height: 12),
                   ],
-                  Text(output,
-                      style: theme.textTheme.bodyLarge?.copyWith(height: 1.5)),
+                  Text(
+                    output,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: outputInk,
+                      height: 1.5,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                   if (assistant.summary != null) ...[
                     const SizedBox(height: 14),
                     FilledButton.tonalIcon(
+                      style: outputButtonStyle,
                       onPressed: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
@@ -161,6 +194,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
                   if (assistant.flashcards.isNotEmpty) ...[
                     const SizedBox(height: 14),
                     FilledButton.tonalIcon(
+                      style: outputButtonStyle,
                       onPressed: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
@@ -176,6 +210,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
                   if (assistant.quiz.isNotEmpty) ...[
                     const SizedBox(height: 14),
                     FilledButton.tonalIcon(
+                      style: outputButtonStyle,
                       onPressed: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
