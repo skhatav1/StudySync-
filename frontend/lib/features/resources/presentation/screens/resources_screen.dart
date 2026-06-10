@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/providers/resources_provider.dart';
 import '../../../../shared/widgets/app_scaffold.dart';
 import '../../../../shared/widgets/glass_card.dart';
+import '../../../../shared/widgets/skeleton.dart';
 import '../../../../shared/widgets/ui_helpers.dart';
 import 'resource_detail_screen.dart';
 import 'upload_resource_screen.dart';
@@ -97,7 +98,9 @@ class _ResourcesScreenState extends State<ResourcesScreen> {
             ],
             const SizedBox(height: 16),
             const SectionHeader(title: 'Saved resources'),
-            if (resources.resources.isEmpty)
+            if (resources.loading && resources.resources.isEmpty)
+              const SkeletonScreen(cardCount: 4)
+            else if (resources.resources.isEmpty)
               const GlassCard(
                 child: EmptyState(
                   icon: Icons.folder_open_rounded,

@@ -5,6 +5,7 @@ import '../../../../core/providers/plans_provider.dart';
 import '../../../../core/providers/profile_provider.dart';
 import '../../../../shared/widgets/app_scaffold.dart';
 import '../../../../shared/widgets/glass_card.dart';
+import '../../../../shared/widgets/skeleton.dart';
 import '../../../../shared/widgets/ui_helpers.dart';
 import 'study_session_detail_screen.dart';
 
@@ -80,7 +81,9 @@ class StudyPlanScreen extends StatelessWidget {
               ErrorText(plans.error!),
             ],
             const SizedBox(height: 16),
-            if (plan == null)
+            if (plans.loading && plan == null)
+              const SkeletonScreen(cardCount: 3)
+            else if (plan == null)
               const GlassCard(
                 child: EmptyState(
                   icon: Icons.event_note_outlined,

@@ -70,10 +70,16 @@ class ProfileProvider extends ChangeNotifier {
         exams: newExams,
         assignments: newAssignments,
       );
-      profile = updatedProfile;
-      courses = newCourses;
-      exams = newExams;
-      assignments = newAssignments;
+      // Re-fetch from backend to guarantee UI reflects server state.
+      final results = await Future.wait<Object?>([
+        _repository.fetchProfile(),
+        _repository.fetchOnboardingData(),
+      ]);
+      profile = results[0] as UserProfile?;
+      final onboarding = results[1] as OnboardingData;
+      courses = onboarding.courses;
+      exams = onboarding.exams;
+      assignments = onboarding.assignments;
     } catch (exc) {
       error = exc.toString();
     } finally {

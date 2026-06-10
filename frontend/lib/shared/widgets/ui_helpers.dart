@@ -54,18 +54,21 @@ class EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 18),
-      child: Column(
-        children: [
-          Icon(icon, size: 34, color: theme.colorScheme.primary),
-          const SizedBox(height: 10),
-          Text(title,
-              style: theme.textTheme.titleMedium, textAlign: TextAlign.center),
-          const SizedBox(height: 4),
-          Text(message,
-              style: theme.textTheme.bodyMedium, textAlign: TextAlign.center),
-        ],
+    return Semantics(
+      label: '$title. $message',
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 18),
+        child: Column(
+          children: [
+            Icon(icon, size: 34, color: theme.colorScheme.primary, semanticLabel: ''),
+            const SizedBox(height: 10),
+            Text(title,
+                style: theme.textTheme.titleMedium, textAlign: TextAlign.center),
+            const SizedBox(height: 4),
+            Text(message,
+                style: theme.textTheme.bodyMedium, textAlign: TextAlign.center),
+          ],
+        ),
       ),
     );
   }

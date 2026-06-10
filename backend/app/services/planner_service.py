@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 
 from app.models.domain import CollectionNames
 from app.schemas.plans import (
@@ -51,7 +51,8 @@ class PlannerService:
                 exams=payload.exams,
                 assignments=payload.assignments,
                 context=payload.context,
-            )
+            ),
+            missed_task_ids=set(payload.missed_task_ids),
         )
         base.headline = "Plan recalculated after schedule changes and missed work."
         base.prioritization_summary.insert(0, payload.reason or "Workload redistributed to stay realistic.")
@@ -86,7 +87,7 @@ class PlannerService:
         ]
 
     def start_session(self, uid: str, request: StudySessionCreateRequest) -> StudySessionResponse:
-        started_at = datetime.utcnow().isoformat()
+        started_at = datetime.now(timezone.utc).isoformat()
         stored = self.store.create(
             CollectionNames.study_sessions,
             {
@@ -124,8 +125,10 @@ class PlannerService:
         sessions.sort(key=lambda item: item.get("started_at", ""), reverse=True)
         return [StudySessionResponse.model_validate(item) for item in sessions]
 
-    def _build_deterministic_plan(self, payload: StudyPlanGenerateRequest) -> StudyPlanResponse:
-        today = datetime.utcnow().date()
+    def _build_deterministic_plan(
+        self, payload: StudyPlanGenerateRequest, missed_task_ids: set[str] | None = None
+    ) -> StudyPlanResponse:
+        today = datetime.now(timezone.utc).date()
         study_minutes = int(payload.context.preferred_study_hours * 60)
         subject_scores: list[tuple[str, int, str]] = []
 
@@ -150,22 +153,29 @@ class PlannerService:
         subject_scores.sort(key=lambda item: item[1], reverse=True)
         priorities = [f"{name}: {reason}" for name, _, reason in subject_scores[:4]]
 
+        missed = missed_task_ids or set()
         daily_plan: list[StudyDayPlan] = []
         revision_intervals: dict[str, list[str]] = {}
         recommendations: list[RecommendationItem] = []
+        # Extra minutes to redistribute from missed sessions (5 min per missed task, capped at 30).
+        missed_bonus = min(len(missed) * 5, 30)
 
         for day_offset in range(7):
             date_value = today + timedelta(days=day_offset)
-            remaining = study_minutes
+            remaining = study_minutes + (missed_bonus if day_offset < 3 else 0)
             sessions: list[StudyTask] = []
             for index, (course_name, score, reason) in enumerate(subject_scores[:3]):
+                task_id = f"{date_value.isoformat()}_{course_name.lower().replace(' ', '_')}_{index}"
+                # Skip tasks that were explicitly missed so they are rescheduled to a later slot.
+                if task_id in missed:
+                    continue
                 duration = min(payload.context.preferred_session_length, max(25, remaining // max(1, 3 - index)))
                 if remaining < 20:
                     break
                 start_label = payload.context.preferred_study_times[index % len(payload.context.preferred_study_times)] if payload.context.preferred_study_times else f"{18 + index}:00"
                 end_dt = datetime.combine(date_value, datetime.strptime(start_label, "%H:%M").time()) + timedelta(minutes=duration)
                 task = StudyTask(
-                    id=f"{date_value.isoformat()}_{course_name.lower().replace(' ', '_')}_{index}",
+                    id=task_id,
                     title=f"{course_name} focus block",
                     course_name=course_name,
                     type="study",
@@ -173,7 +183,7 @@ class PlannerService:
                     scheduled_end=end_dt.isoformat(),
                     duration_minutes=duration,
                     priority="high" if score > 120 else "medium",
-                    rationale=f"Scheduled because {reason}.",
+                    rationale=f"Scheduled because {reason}." + (" Redistributed from a missed session." if missed else ""),
                     linked_resource_ids=[],
                 )
                 sessions.append(task)

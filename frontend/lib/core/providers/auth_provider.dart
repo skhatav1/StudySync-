@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../repositories/auth_repository.dart';
+import '../services/api_client.dart';
 
 class AuthProvider extends ChangeNotifier {
   AuthProvider(this._repository) {
@@ -28,6 +29,7 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> signOut() async {
+    ApiClient.instance.clearTokenCache();
     await _repository.signOut();
   }
 

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/providers/groups_provider.dart';
 import '../../../../shared/widgets/app_scaffold.dart';
 import '../../../../shared/widgets/glass_card.dart';
+import '../../../../shared/widgets/skeleton.dart';
 import '../../../../shared/widgets/ui_helpers.dart';
 import 'group_detail_screen.dart';
 
@@ -103,7 +104,9 @@ class _GroupsScreenState extends State<GroupsScreen> {
             ),
             const SizedBox(height: 16),
             const SectionHeader(title: 'Your study rooms'),
-            if (groupsProvider.groups.isEmpty)
+            if (groupsProvider.loading && groupsProvider.groups.isEmpty)
+              const SkeletonScreen(cardCount: 3)
+            else if (groupsProvider.groups.isEmpty)
               const GlassCard(
                 child: EmptyState(
                   icon: Icons.groups_outlined,

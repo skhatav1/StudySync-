@@ -41,10 +41,15 @@ class AppScaffold extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         if (Navigator.of(context).canPop()) ...[
-                          IconButton.filledTonal(
-                            tooltip: 'Back',
-                            onPressed: () => Navigator.of(context).pop(),
-                            icon: const Icon(Icons.arrow_back_rounded),
+                          Semantics(
+                            button: true,
+                            label: 'Go back',
+                            excludeSemantics: true,
+                            child: IconButton.filledTonal(
+                              tooltip: 'Back',
+                              onPressed: () => Navigator.of(context).pop(),
+                              icon: const Icon(Icons.arrow_back_rounded),
+                            ),
                           ),
                           const SizedBox(width: 10),
                         ],

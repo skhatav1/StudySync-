@@ -74,29 +74,13 @@ class AnalyticsScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                        barGroups: [
-                          BarChartGroupData(
-                              x: 0,
-                              barRods: [BarChartRodData(toY: 3.0, width: 16)]),
-                          BarChartGroupData(
-                              x: 1,
-                              barRods: [BarChartRodData(toY: 4.4, width: 16)]),
-                          BarChartGroupData(
-                              x: 2,
-                              barRods: [BarChartRodData(toY: 2.2, width: 16)]),
-                          BarChartGroupData(
-                              x: 3,
-                              barRods: [BarChartRodData(toY: 4.9, width: 16)]),
-                          BarChartGroupData(
-                              x: 4,
-                              barRods: [BarChartRodData(toY: 3.7, width: 16)]),
-                          BarChartGroupData(
-                              x: 5,
-                              barRods: [BarChartRodData(toY: 2.8, width: 16)]),
-                          BarChartGroupData(
-                              x: 6,
-                              barRods: [BarChartRodData(toY: 1.5, width: 16)]),
-                        ],
+                        barGroups: List.generate(7, (i) {
+                          final hours = summary?.weeklyHours.elementAtOrNull(i) ?? 0.0;
+                          return BarChartGroupData(
+                            x: i,
+                            barRods: [BarChartRodData(toY: hours, width: 16)],
+                          );
+                        }),
                       ),
                     ),
                   ),

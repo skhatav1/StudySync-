@@ -40,12 +40,25 @@ class FirestoreService:
             return None
         return {"id": snapshot.id, **(snapshot.to_dict() or {})}
 
-    def list_for_user(self, collection: str, user_field: str, user_id: str) -> list[dict[str, Any]]:
-        docs = (
+    def list_for_user(
+        self,
+        collection: str,
+        user_field: str,
+        user_id: str,
+        limit: int = 50,
+        cursor: str | None = None,
+    ) -> list[dict[str, Any]]:
+        query = (
             self.client.collection(collection)
             .where(filter=FieldFilter(user_field, "==", user_id))
-            .stream()
+            .order_by("created_at", direction="DESCENDING")
+            .limit(limit)
         )
+        if cursor:
+            cursor_doc = self.client.collection(collection).document(cursor).get()
+            if cursor_doc.exists:
+                query = query.start_after(cursor_doc)
+        docs = query.stream()
         return [{"id": doc.id, **(doc.to_dict() or {})} for doc in docs]
 
     def update(self, collection: str, document_id: str, payload: dict[str, Any]) -> dict[str, Any]:

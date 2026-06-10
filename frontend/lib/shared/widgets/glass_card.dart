@@ -7,22 +7,24 @@ class GlassCard extends StatelessWidget {
     this.padding = const EdgeInsets.all(16),
     this.gradient,
     this.onTap,
+    this.semanticLabel,
   });
 
   final Widget child;
   final EdgeInsets padding;
   final Gradient? gradient;
   final VoidCallback? onTap;
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final borderRadius = BorderRadius.circular(8);
     final decoration = BoxDecoration(
       gradient: gradient,
       color: gradient == null ? theme.cardTheme.color : null,
-      borderRadius: BorderRadius.circular(8),
-      border:
-          Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.14)),
+      borderRadius: borderRadius,
+      border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.14)),
       boxShadow: [
         BoxShadow(
           color: Colors.black.withValues(
@@ -32,18 +34,26 @@ class GlassCard extends StatelessWidget {
         ),
       ],
     );
-    final content = Container(
-      padding: padding,
-      decoration: decoration,
-      child: child,
-    );
-    if (onTap == null) return content;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: content,
+
+    if (onTap == null) {
+      return Container(padding: padding, decoration: decoration, child: child);
+    }
+
+    // Use Ink so the ripple renders on top of the decoration correctly.
+    return Semantics(
+      label: semanticLabel,
+      button: semanticLabel != null,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: borderRadius,
+        child: Ink(
+          decoration: decoration,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: borderRadius,
+            child: Padding(padding: padding, child: child),
+          ),
+        ),
       ),
     );
   }

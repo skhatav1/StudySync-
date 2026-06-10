@@ -1,5 +1,5 @@
 from collections import Counter
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.models.domain import CollectionNames
 from app.schemas.analytics import AnalyticsSummaryResponse
@@ -38,6 +38,23 @@ class AnalyticsService:
         recent_courses = Counter(session.get("course_name", "") for session in sessions if session.get("course_name"))
         top_course = recent_courses.most_common(1)[0][0] if recent_courses else "your highest-priority subject"
 
+        # Build per-weekday hours array (Mon=0 … Sun=6) for the current week.
+        today = datetime.now(timezone.utc).date()
+        week_start = today.toordinal() - today.weekday()
+        weekly_hours = [0.0] * 7
+        for session in sessions:
+            started = session.get("started_at", "")
+            if not started:
+                continue
+            try:
+                day_ord = datetime.fromisoformat(started).date().toordinal()
+                day_index = day_ord - week_start
+                if 0 <= day_index < 7:
+                    weekly_hours[day_index] += float(session.get("actual_minutes", 0)) / 60
+            except ValueError:
+                pass
+        weekly_hours = [round(h, 2) for h in weekly_hours]
+
         return AnalyticsSummaryResponse(
             streak_days=max(1, tasks_completed),
             hours_studied=hours,
@@ -46,10 +63,11 @@ class AnalyticsService:
             weak_subjects=profile.weak_subjects if profile else [],
             upcoming_deadlines=upcoming,
             productivity_score=productivity,
+            weekly_hours=weekly_hours,
             ai_insights=[
                 f"You are spending the most logged time on {top_course}.",
                 "Shorter active recall blocks work best when your schedule tightens.",
                 "Completed sessions now feed directly into your analytics and productivity score.",
-                f"Last refreshed at {datetime.utcnow().isoformat()} UTC.",
+                f"Last refreshed at {datetime.now(timezone.utc).isoformat()} UTC.",
             ],
         )

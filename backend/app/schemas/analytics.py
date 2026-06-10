@@ -10,3 +10,4 @@ class AnalyticsSummaryResponse(BaseModel):
     upcoming_deadlines: list[str] = Field(default_factory=list)
     productivity_score: int
     ai_insights: list[str] = Field(default_factory=list)
+    weekly_hours: list[float] = Field(default_factory=lambda: [0.0] * 7)

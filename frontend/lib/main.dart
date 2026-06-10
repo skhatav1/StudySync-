@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -29,6 +32,18 @@ import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Catch Flutter framework errors — report to Crashlytics and show friendly screen.
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    FirebaseCrashlytics.instance.recordFlutterFatalError(details);
+  };
+
+  // Override the red error widget shown on widget build failures.
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    return _AppErrorWidget(message: details.exception.toString());
+  };
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -37,29 +52,81 @@ Future<void> main() async {
   final firestore = FirebaseFirestore.instance;
   final storage = FirebaseStorage.instance;
 
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider(AuthRepository(auth))),
-        ChangeNotifierProvider(create: (_) => ProfileProvider(ProfileRepository())),
-        ChangeNotifierProvider(create: (_) => PlansProvider(PlansRepository())),
-        ChangeNotifierProvider(create: (_) => StudySessionsProvider(PlansRepository())),
-        ChangeNotifierProvider(create: (_) => AssistantProvider(AssistantRepository())),
-        ChangeNotifierProvider(create: (_) => AnalyticsProvider(AnalyticsRepository())),
-        ChangeNotifierProvider(
-          create: (_) => ResourcesProvider(ResourcesRepository(storage: storage, auth: auth)),
+  // Catch all uncaught async errors (platform channel, isolate, etc.).
+  runZonedGuarded(
+    () {
+      runApp(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => AuthProvider(AuthRepository(auth))),
+            ChangeNotifierProvider(create: (_) => ProfileProvider(ProfileRepository())),
+            ChangeNotifierProvider(create: (_) => PlansProvider(PlansRepository())),
+            ChangeNotifierProvider(create: (_) => StudySessionsProvider(PlansRepository())),
+            ChangeNotifierProvider(create: (_) => AssistantProvider(AssistantRepository())),
+            ChangeNotifierProvider(create: (_) => AnalyticsProvider(AnalyticsRepository())),
+            ChangeNotifierProvider(
+              create: (_) => ResourcesProvider(ResourcesRepository(storage: storage, auth: auth)),
+            ),
+            ChangeNotifierProvider(
+              create: (_) => GroupsProvider(GroupsRepository(firestore))..bind(),
+            ),
+            ChangeNotifierProvider(
+              create: (_) => NotificationsProvider(
+                  NotificationsRepository(firestore: firestore, auth: auth))
+                ..bind(),
+            ),
+            ChangeNotifierProvider(
+              create: (_) => DemoProvider(DemoSeedRepository(firestore: firestore, auth: auth)),
+            ),
+          ],
+          child: const StudySyncApp(),
         ),
-        ChangeNotifierProvider(
-          create: (_) => GroupsProvider(GroupsRepository(firestore))..bind(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => NotificationsProvider(NotificationsRepository(firestore: firestore, auth: auth))..bind(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => DemoProvider(DemoSeedRepository(firestore: firestore, auth: auth)),
-        ),
-      ],
-      child: const StudySyncApp(),
-    ),
+      );
+    },
+    (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    },
   );
+}
+
+class _AppErrorWidget extends StatelessWidget {
+  const _AppErrorWidget({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.error_outline_rounded, size: 48, color: Colors.red),
+                const SizedBox(height: 16),
+                const Text(
+                  'Something went wrong',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.grey),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () => runApp(const SizedBox()),
+                  child: const Text('Restart app'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
