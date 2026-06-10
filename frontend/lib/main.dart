@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -31,30 +32,32 @@ import 'core/repositories/resources_repository.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  // Catch Flutter framework errors — report to Crashlytics and show friendly screen.
-  FlutterError.onError = (FlutterErrorDetails details) {
-    FlutterError.presentError(details);
-    FirebaseCrashlytics.instance.recordFlutterFatalError(details);
-  };
-
-  // Override the red error widget shown on widget build failures.
-  ErrorWidget.builder = (FlutterErrorDetails details) {
-    return _AppErrorWidget(message: details.exception.toString());
-  };
-
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
-  final auth = FirebaseAuth.instance;
-  final firestore = FirebaseFirestore.instance;
-  final storage = FirebaseStorage.instance;
-
-  // Catch all uncaught async errors (platform channel, isolate, etc.).
+  // runZonedGuarded must wrap everything so bindings are init'd in the same zone.
   runZonedGuarded(
-    () {
+    () async {
+      WidgetsFlutterBinding.ensureInitialized();
+
+      // Catch Flutter framework errors — report to Crashlytics on mobile only.
+      FlutterError.onError = (FlutterErrorDetails details) {
+        FlutterError.presentError(details);
+        if (!kIsWeb) {
+          FirebaseCrashlytics.instance.recordFlutterFatalError(details);
+        }
+      };
+
+      // Override the red error widget shown on widget build failures.
+      ErrorWidget.builder = (FlutterErrorDetails details) {
+        return _AppErrorWidget(message: details.exception.toString());
+      };
+
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+
+      final auth = FirebaseAuth.instance;
+      final firestore = FirebaseFirestore.instance;
+      final storage = FirebaseStorage.instance;
+
       runApp(
         MultiProvider(
           providers: [
@@ -84,7 +87,9 @@ Future<void> main() async {
       );
     },
     (error, stack) {
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      if (!kIsWeb) {
+        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      }
     },
   );
 }
