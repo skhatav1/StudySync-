@@ -15,63 +15,46 @@ class ProfileRepository {
     return UserProfile.fromJson(Map<String, dynamic>.from(response.data as Map));
   }
 
-  Future<List<CourseModel>> fetchCourses() async {
-    final data = await _fetchOnboardingData();
-    return (data['courses'] as List<dynamic>? ?? const [])
-        .map(
-          (item) {
-            final json = Map<String, dynamic>.from(item as Map);
-            return CourseModel(
-            id: json['id'] as String?,
-            name: json['name'] as String? ?? '',
-            currentGrade: json['current_grade'] as String?,
-            confidence: json['confidence'] as int? ?? 5,
-          );
-          },
-        )
-        .toList();
-  }
-
-  Future<List<ExamModel>> fetchExams() async {
-    final data = await _fetchOnboardingData();
-    return (data['exams'] as List<dynamic>? ?? const [])
-        .map(
-          (item) {
-            final json = Map<String, dynamic>.from(item as Map);
-            return ExamModel(
-            id: json['id'] as String?,
-            courseName: json['course_name'] as String? ?? '',
-            title: json['title'] as String? ?? '',
-            examDate: json['exam_date'] as String? ?? '',
-            targetScore: json['target_score'] as String?,
-          );
-          },
-        )
-        .toList();
-  }
-
-  Future<List<AssignmentModel>> fetchAssignments() async {
-    final data = await _fetchOnboardingData();
-    return (data['assignments'] as List<dynamic>? ?? const [])
-        .map(
-          (item) {
-            final json = Map<String, dynamic>.from(item as Map);
-            return AssignmentModel(
-            id: json['id'] as String?,
-            courseName: json['course_name'] as String? ?? '',
-            title: json['title'] as String? ?? '',
-            dueDate: json['due_date'] as String? ?? '',
-            estimatedHours: (json['estimated_hours'] as num?)?.toDouble() ?? 1,
-            priority: json['priority'] as String? ?? 'medium',
-          );
-          },
-        )
-        .toList();
-  }
-
-  Future<Map<String, dynamic>> _fetchOnboardingData() async {
+  Future<OnboardingData> fetchOnboardingData() async {
     final response = await ApiClient.instance.client.get('/api/profile/onboarding-data');
-    return Map<String, dynamic>.from(response.data as Map);
+    final data = response.data is Map
+        ? Map<String, dynamic>.from(response.data as Map)
+        : <String, dynamic>{};
+
+    final courses = (data['courses'] as List<dynamic>? ?? const []).map((item) {
+      final json = Map<String, dynamic>.from(item as Map);
+      return CourseModel(
+        id: json['id'] as String?,
+        name: json['name'] as String? ?? '',
+        currentGrade: json['current_grade'] as String?,
+        confidence: json['confidence'] as int? ?? 5,
+      );
+    }).toList();
+
+    final exams = (data['exams'] as List<dynamic>? ?? const []).map((item) {
+      final json = Map<String, dynamic>.from(item as Map);
+      return ExamModel(
+        id: json['id'] as String?,
+        courseName: json['course_name'] as String? ?? '',
+        title: json['title'] as String? ?? '',
+        examDate: json['exam_date'] as String? ?? '',
+        targetScore: json['target_score'] as String?,
+      );
+    }).toList();
+
+    final assignments = (data['assignments'] as List<dynamic>? ?? const []).map((item) {
+      final json = Map<String, dynamic>.from(item as Map);
+      return AssignmentModel(
+        id: json['id'] as String?,
+        courseName: json['course_name'] as String? ?? '',
+        title: json['title'] as String? ?? '',
+        dueDate: json['due_date'] as String? ?? '',
+        estimatedHours: (json['estimated_hours'] as num?)?.toDouble() ?? 1,
+        priority: json['priority'] as String? ?? 'medium',
+      );
+    }).toList();
+
+    return OnboardingData(courses: courses, exams: exams, assignments: assignments);
   }
 
   Future<void> ensureProfile(User user) async {
@@ -119,4 +102,16 @@ class ProfileRepository {
       },
     );
   }
+}
+
+class OnboardingData {
+  const OnboardingData({
+    required this.courses,
+    required this.exams,
+    required this.assignments,
+  });
+
+  final List<CourseModel> courses;
+  final List<ExamModel> exams;
+  final List<AssignmentModel> assignments;
 }

@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 
 from app.core.auth import get_current_user
+from app.core.limiter import limiter
 from app.schemas.ai import (
     AssistantChatRequest,
     AssistantChatResponse,
@@ -17,27 +18,34 @@ from app.services.ai_service import AIService
 router = APIRouter()
 service = AIService()
 
+_AI_RATE = "10/minute"
+
 
 @router.post("/summarize", response_model=SummaryResponse)
-async def summarize(payload: SummaryRequest, current_user=Depends(get_current_user)):
+@limiter.limit(_AI_RATE)
+async def summarize(request: Request, payload: SummaryRequest, current_user=Depends(get_current_user)):
     return service.summarize(current_user["uid"], payload)
 
 
 @router.post("/flashcards", response_model=FlashcardsResponse)
-async def flashcards(payload: SummaryRequest, current_user=Depends(get_current_user)):
+@limiter.limit(_AI_RATE)
+async def flashcards(request: Request, payload: SummaryRequest, current_user=Depends(get_current_user)):
     return service.flashcards(current_user["uid"], payload)
 
 
 @router.post("/quiz", response_model=QuizResponse)
-async def quiz(payload: SummaryRequest, current_user=Depends(get_current_user)):
+@limiter.limit(_AI_RATE)
+async def quiz(request: Request, payload: SummaryRequest, current_user=Depends(get_current_user)):
     return service.quiz(current_user["uid"], payload)
 
 
 @router.post("/explain", response_model=ExplainResponse)
-async def explain(payload: ExplainRequest, current_user=Depends(get_current_user)):
+@limiter.limit(_AI_RATE)
+async def explain(request: Request, payload: ExplainRequest, current_user=Depends(get_current_user)):
     return service.explain(current_user["uid"], payload)
 
 
 @router.post("/chat", response_model=AssistantChatResponse)
-async def chat(payload: AssistantChatRequest, current_user=Depends(get_current_user)):
+@limiter.limit(_AI_RATE)
+async def chat(request: Request, payload: AssistantChatRequest, current_user=Depends(get_current_user)):
     return service.chat(current_user["uid"], payload)

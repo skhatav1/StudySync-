@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 
 from app.core.auth import get_current_user
+from app.core.limiter import limiter
 from app.schemas.plans import (
     MarkTaskCompleteRequest,
     RecalculatePlanRequest,
@@ -18,7 +19,8 @@ planner_service = PlannerService()
 
 
 @router.post("/generate", response_model=StudyPlanResponse)
-async def generate_plan(payload: StudyPlanGenerateRequest, current_user=Depends(get_current_user)) -> StudyPlanResponse:
+@limiter.limit("5/minute")
+async def generate_plan(request: Request, payload: StudyPlanGenerateRequest, current_user=Depends(get_current_user)) -> StudyPlanResponse:
     return planner_service.generate_plan(current_user["uid"], payload)
 
 
@@ -28,7 +30,8 @@ async def current_plan(current_user=Depends(get_current_user)) -> StudyPlanRespo
 
 
 @router.post("/recalculate", response_model=StudyPlanResponse)
-async def recalculate_plan(payload: RecalculatePlanRequest, current_user=Depends(get_current_user)) -> StudyPlanResponse:
+@limiter.limit("5/minute")
+async def recalculate_plan(request: Request, payload: RecalculatePlanRequest, current_user=Depends(get_current_user)) -> StudyPlanResponse:
     return planner_service.recalculate_plan(current_user["uid"], payload)
 
 

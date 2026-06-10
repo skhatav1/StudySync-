@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../models/study_entities.dart';
 import '../models/user_profile.dart';
-import '../repositories/profile_repository.dart';
+import '../repositories/profile_repository.dart' show OnboardingData, ProfileRepository;
 
 class ProfileProvider extends ChangeNotifier {
   ProfileProvider(this._repository);
@@ -35,10 +35,15 @@ class ProfileProvider extends ChangeNotifier {
     notifyListeners();
     try {
       await _repository.ensureProfile(user);
-      profile = await _repository.fetchProfile();
-      courses = await _repository.fetchCourses();
-      exams = await _repository.fetchExams();
-      assignments = await _repository.fetchAssignments();
+      final results = await Future.wait<Object?>([
+        _repository.fetchProfile(),
+        _repository.fetchOnboardingData(),
+      ]);
+      profile = results[0] as UserProfile?;
+      final onboarding = results[1] as OnboardingData;
+      courses = onboarding.courses;
+      exams = onboarding.exams;
+      assignments = onboarding.assignments;
       hasLoaded = true;
     } catch (exc) {
       error = exc.toString();

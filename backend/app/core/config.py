@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     app_name: str = "StudySync API"
     app_env: str = "development"
     openai_api_key: str = ""
-    openai_model: str = "gpt-5-mini"
+    openai_model: str = "gpt-4o-mini"
     firebase_project_id: str = "studysync-demo"
     firebase_storage_bucket: str = "studysync-demo.appspot.com"
     firebase_credentials_path: str = ""

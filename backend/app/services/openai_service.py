@@ -24,14 +24,14 @@ class OpenAIService:
 
     def generate_structured(self, *, system_prompt: str, user_prompt: str, schema: type[SchemaT]) -> SchemaT:
         client = self.ensure_client()
-        response = client.responses.create(
+        response = client.chat.completions.create(
             model=self.model,
-            input=[
+            messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
         )
-        raw = response.output_text
+        raw = response.choices[0].message.content or ""
         parsed = extract_json(raw)
         if isinstance(parsed, list):
             parsed = {"items": parsed}
@@ -39,14 +39,14 @@ class OpenAIService:
 
     def generate_text(self, *, system_prompt: str, user_prompt: str) -> str:
         client = self.ensure_client()
-        response = client.responses.create(
+        response = client.chat.completions.create(
             model=self.model,
-            input=[
+            messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
         )
-        return response.output_text
+        return response.choices[0].message.content or ""
 
     @staticmethod
     def to_json_prompt(schema: type[BaseModel], task: str) -> str:
